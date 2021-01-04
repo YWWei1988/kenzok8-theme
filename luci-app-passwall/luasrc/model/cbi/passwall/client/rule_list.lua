@@ -2,7 +2,10 @@ local fs = require "nixio.fs"
 local appname = "passwall"
 
 m = Map(appname)
-
+m.apply_on_parse=true
+function m.on_apply(self)
+luci.sys.call("/etc/init.d/passwall reload > /dev/null 2>&1 &")
+end
 -- [[ Rule List Settings ]]--
 s = m:section(TypedSection, "global_rules")
 s.anonymous = true
@@ -14,7 +17,7 @@ s:tab("proxy_list3", translate("Proxy List") .. " 3")
 
 ---- Direct Hosts
 local direct_host = string.format("/usr/share/%s/rules/direct_host", appname)
-o = s:taboption("direct_list", TextValue, "direct_hosts", "", "<font color='red'>" .. translate("Join the direct hosts list of domain names will not proxy.") .. "</font>")
+o = s:taboption("direct_list", TextValue, "direct_host", "", "<font color='red'>" .. translate("Join the direct hosts list of domain names will not proxy.") .. "</font>")
 o.rows = 15
 o.wrap = "off"
 o.cfgvalue = function(self, section) return fs.readfile(direct_host) or "" end
